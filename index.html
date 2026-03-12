@@ -80,12 +80,18 @@ hr{margin:25px 0}
 <select id="ja_regla">
 
 <option value="">Seleccionar regla WA</option>
-<option>TR16.5 - Salida falsa</option>
-<option>TR17.2 - Obstrucción</option>
-<option>TR17.3 - Empujón</option>
-<option>TR17.4 - Abandono de calle</option>
-<option>TR17.5 - Recorte de distancia</option>
-<option>TR24.7 - Error en relevos</option>
+
+<option>TR16.5 Salida falsa</option>
+<option>TR17.2 Obstrucción</option>
+<option>TR17.3 Empujar o bloquear</option>
+<option>TR17.4 Abandono de calle</option>
+<option>TR17.5 Recorte de distancia</option>
+<option>TR18.5 Ayuda externa</option>
+<option>TR24.7 Error en relevos</option>
+<option>TR24.8 Zona de cambio incorrecta</option>
+<option>TR25.19 Intento nulo salto</option>
+<option>TR26.7 Intento nulo altura</option>
+<option>TR28.12 Intento nulo lanzamiento</option>
 
 </select>
 
@@ -132,6 +138,18 @@ hr{margin:25px 0}
 <button onclick="generarPDF()">Guardar PDF</button>
 
 <script>
+
+window.onload = function(){
+
+const hoy = new Date();
+
+document.getElementById("fecha").value = hoy.toISOString().split("T")[0];
+
+document.getElementById("ja_hora").value =
+hoy.getHours().toString().padStart(2,"0")+":"+
+hoy.getMinutes().toString().padStart(2,"0");
+
+}
 
 function activarFirma(id){
 
@@ -196,6 +214,19 @@ canvas.getContext("2d").clearRect(0,0,canvas.width,canvas.height)
 activarFirma("firmaJA")
 
 activarFirma("firmaAR")
+
+function bloquearAuxiliar(){
+
+document.querySelectorAll("#ja_nombre,#ja_regla,#ja_hora,#ja_incidencia")
+.forEach(campo => campo.disabled=true)
+
+}
+if(firmaJA.toDataURL().length<2000){
+alert("Debe firmar el juez auxiliar");
+return;
+}
+
+bloquearAuxiliar();
 
 function enviarArbitro(){
 
@@ -271,33 +302,87 @@ img.src=firma
 
 async function generarPDF(){
 
-const {jsPDF}=window.jspdf
+const {jsPDF}=window.jspdf;
 
-const pdf=new jsPDF()
+const pdf=new jsPDF("p","mm","a4");
 
-pdf.text("PARTE DE DESCALIFICACIÓN",60,20)
+pdf.setFontSize(16);
+pdf.text("PARTE DE DESCALIFICACIÓN",60,20);
 
-pdf.text("Competición: "+competicion.value,20,35)
+pdf.setFontSize(11);
 
-pdf.text("Prueba: "+prueba.value,20,45)
+pdf.text("Competición:",20,35);
+pdf.text(competicion.value,50,35);
 
-pdf.text("Dorsal: "+dorsal.value,120,45)
+pdf.text("Fecha:",140,35);
+pdf.text(fecha.value,160,35);
 
-pdf.text("Juez Auxiliar: "+ja_nombre.value,20,65)
+pdf.text("Prueba:",20,45);
+pdf.text(prueba.value,50,45);
 
-pdf.text("Regla: "+ja_regla.value,20,75)
+pdf.text("Dorsal:",140,45);
+pdf.text(dorsal.value,160,45);
 
-pdf.addImage(firmaJA.toDataURL(),"PNG",20,85,60,30)
+pdf.text("JUEZ AUXILIAR",20,60);
 
-pdf.addPage()
+pdf.text("Nombre:",20,70);
+pdf.text(ja_nombre.value,50,70);
 
-pdf.text("Juez Árbitro: "+ar_nombre.value,20,20)
+pdf.text("Regla:",20,80);
+pdf.text(ja_regla.value,50,80);
 
-pdf.text("Descalificado: "+ar_descalificado.value,20,30)
+pdf.text("Hora:",140,80);
+pdf.text(ja_hora.value,160,80);
 
-pdf.addImage(firmaAR.toDataURL(),"PNG",20,40,60,30)
+pdf.text("Incidencia:",20,95);
 
-pdf.save("parte_descalificacion.pdf")
+pdf.text(ja_incidencia.value,20,105);
+
+pdf.addImage(firmaJA.toDataURL(),"PNG",20,120,60,25);
+
+pdf.text("JUEZ ÁRBITRO",20,160);
+
+pdf.text("Nombre:",20,170);
+pdf.text(ar_nombre.value,50,170);
+
+pdf.text("Descalificado:",20,180);
+pdf.text(ar_descalificado.value,70,180);
+
+pdf.text("Regla:",20,190);
+pdf.text(ar_regla.value,50,190);
+
+pdf.text("Fecha:",140,190);
+pdf.text(ar_fecha.value,160,190);
+
+pdf.text("Hora:",180,190);
+pdf.text(ar_hora.value,195,190);
+
+pdf.text("Observaciones:",20,205);
+
+pdf.text(ar_obs.value,20,215);
+
+pdf.addImage(firmaAR.toDataURL(),"PNG",20,235,60,25);
+
+pdf.save("parte_descalificacion.pdf");
+
+guardarHistorial();
+
+}
+
+function guardarHistorial(){
+
+let historial = JSON.parse(localStorage.getItem("historial_partes") || "[]");
+
+historial.push({
+
+fecha:new Date().toISOString(),
+competicion:competicion.value,
+prueba:prueba.value,
+dorsal:dorsal.value
+
+});
+
+localStorage.setItem("historial_partes", JSON.stringify(historial));
 
 }
 
