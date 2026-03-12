@@ -234,27 +234,50 @@ async function generarPDF(){
 
 const {jsPDF}=window.jspdf;
 
-const pdf=new jsPDF();
+const pdf=new jsPDF("p","mm","a4");
 
-pdf.text("PARTE DE DESCALIFICACIÓN",20,20);
+pdf.setFontSize(12);
+
+pdf.text("PARTE DE DESCALIFICACIÓN",60,20);
 
 pdf.text("Competición: "+competicion.value,20,35);
+pdf.text("Fecha: "+fecha.value,120,35);
 
-pdf.text("Prueba: "+prueba.value,20,42);
+pdf.text("Prueba: "+prueba.value,20,45);
+pdf.text("Dorsal: "+dorsal.value,120,45);
 
-pdf.text("Dorsal: "+dorsal.value,20,49);
+pdf.text("JUEZ AUXILIAR",20,60);
 
-pdf.text("Juez Auxiliar: "+ja_nombre.value,20,60);
+pdf.text("Nombre: "+ja_nombre.value,20,70);
+pdf.text("Regla: "+ja_regla.value,20,80);
+pdf.text("Hora: "+ja_hora.value,120,80);
 
-pdf.addImage(firmaJA.toDataURL(),"PNG",20,65,60,30);
+pdf.text("Incidencia:",20,90);
+pdf.text(ja_incidencia.value,20,100);
 
-pdf.addPage();
+const firma1=firmaJA.toDataURL("image/png");
 
-pdf.text("Juez Árbitro: "+ar_nombre.value,20,20);
+pdf.addImage(firma1,"PNG",20,120,60,25);
 
-pdf.text("Descalificado: "+ar_descalificado.value,20,28);
+pdf.text("JUEZ ÁRBITRO",20,160);
 
-pdf.addImage(firmaAR.toDataURL(),"PNG",20,35,60,30);
+pdf.text("Nombre: "+ar_nombre.value,20,170);
+
+pdf.text("Descalificado: "+ar_descalificado.value,20,180);
+
+pdf.text("Regla: "+ar_regla.value,20,190);
+
+pdf.text("Fecha: "+ar_fecha.value,120,190);
+
+pdf.text("Hora: "+ar_hora.value,160,190);
+
+pdf.text("Observaciones:",20,205);
+
+pdf.text(ar_obs.value,20,215);
+
+const firma2=firmaAR.toDataURL("image/png");
+
+pdf.addImage(firma2,"PNG",20,235,60,25);
 
 pdf.save("parte_descalificacion.pdf");
 
