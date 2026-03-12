@@ -184,31 +184,88 @@ activarFirma("firmaAR");
 
 function enviarArbitro(){
 
-const url=window.location.href.split("?")[0]+"?"+
+const id = Date.now().toString();
 
-"competicion="+encodeURIComponent(competicion.value)+
+const datos = {
 
-"&fecha="+encodeURIComponent(fecha.value)+
+competicion: competicion.value,
+fecha: fecha.value,
+prueba: prueba.value,
+dorsal: dorsal.value,
 
-"&prueba="+encodeURIComponent(prueba.value)+
+ja_nombre: ja_nombre.value,
+ja_regla: ja_regla.value,
+ja_hora: ja_hora.value,
+ja_incidencia: ja_incidencia.value,
 
-"&dorsal="+encodeURIComponent(dorsal.value)+
+firmaJA: document.getElementById("firmaJA").toDataURL()
 
-"&ja_nombre="+encodeURIComponent(ja_nombre.value)+
+};
 
-"&ja_regla="+encodeURIComponent(ja_regla.value)+
+localStorage.setItem("parte_"+id, JSON.stringify(datos));
 
-"&ja_hora="+encodeURIComponent(ja_hora.value)+
+const enlace = window.location.origin + window.location.pathname + "?id=" + id;
 
-"&ja_incidencia="+encodeURIComponent(ja_incidencia.value);
+const mensaje = "Completar parte:\n" + enlace;
 
-const mensaje="Completar parte:\n"+url;
-
-window.location.href="https://wa.me/?text="+encodeURIComponent(mensaje);
+window.location.href = "https://wa.me/?text=" + encodeURIComponent(mensaje);
 
 }
 
 const params=new URLSearchParams(window.location.search);
+
+const id = params.get("id");
+
+if(id){
+
+const datos = JSON.parse(localStorage.getItem("parte_"+id));
+
+if(datos){
+
+competicion.value = datos.competicion;
+fecha.value = datos.fecha;
+prueba.value = datos.prueba;
+dorsal.value = datos.dorsal;
+
+ja_nombre.value = datos.ja_nombre;
+ja_regla.value = datos.ja_regla;
+ja_hora.value = datos.ja_hora;
+ja_incidencia.value = datos.ja_incidencia;
+
+const img = new Image();
+
+img.onload = function(){
+
+const canvas = document.getElementById("firmaJA");
+const ctx = canvas.getContext("2d");
+
+ctx.drawImage(img,0,0);
+
+};
+
+img.src = datos.firmaJA;
+
+}
+}
+
+const firmaGuardada = params.get("firmaJA");
+
+if (firmaGuardada) {
+
+const img = new Image();
+
+img.onload = function(){
+
+const canvas = document.getElementById("firmaJA");
+const ctx = canvas.getContext("2d");
+
+ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+};
+
+img.src = firmaGuardada;
+
+}
 
 if(params.get("ja_nombre")){
 
