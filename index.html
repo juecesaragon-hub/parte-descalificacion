@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Parte Descalificación</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -16,29 +16,30 @@ padding:15px;
 background:#f4f4f4;
 }
 
-h2{
-text-align:center;
-}
+h2{text-align:center}
 
 input,textarea,select{
+
 width:100%;
 padding:10px;
 margin-bottom:10px;
 font-size:16px;
+
 }
 
-textarea{
-height:90px;
-}
+textarea{height:90px}
 
 canvas{
+
 border:1px solid black;
 width:100%;
 height:200px;
 background:white;
+
 }
 
 button{
+
 width:100%;
 padding:14px;
 font-size:16px;
@@ -47,11 +48,10 @@ background:#007bff;
 color:white;
 border:none;
 border-radius:6px;
+
 }
 
-hr{
-margin:25px 0;
-}
+hr{margin:25px 0}
 
 </style>
 
@@ -64,8 +64,11 @@ margin:25px 0;
 <h3>Datos generales</h3>
 
 <input id="competicion" placeholder="Competición">
+
 <input id="fecha" type="date">
+
 <input id="prueba" placeholder="Prueba">
+
 <input id="dorsal" placeholder="Dorsal">
 
 <hr>
@@ -74,7 +77,17 @@ margin:25px 0;
 
 <input id="ja_nombre" placeholder="Nombre">
 
-<input id="ja_regla" placeholder="Regla infringida">
+<select id="ja_regla">
+
+<option value="">Seleccionar regla WA</option>
+<option>TR16.5 - Salida falsa</option>
+<option>TR17.2 - Obstrucción</option>
+<option>TR17.3 - Empujón</option>
+<option>TR17.4 - Abandono de calle</option>
+<option>TR17.5 - Recorte de distancia</option>
+<option>TR24.7 - Error en relevos</option>
+
+</select>
 
 <input id="ja_hora" placeholder="Hora">
 
@@ -86,7 +99,7 @@ margin:25px 0;
 
 <button onclick="limpiarFirma('firmaJA')">Limpiar firma</button>
 
-<button onclick="enviarArbitro()">Enviar al Árbitro</button>
+<button onclick="enviarArbitro()">Enviar al árbitro</button>
 
 <hr>
 
@@ -95,9 +108,11 @@ margin:25px 0;
 <input id="ar_nombre" placeholder="Nombre">
 
 <select id="ar_descalificado">
+
 <option value="">Atleta descalificado</option>
 <option>SI</option>
 <option>NO</option>
+
 </select>
 
 <input id="ar_regla" placeholder="Regla">
@@ -120,51 +135,51 @@ margin:25px 0;
 
 function activarFirma(id){
 
-const canvas=document.getElementById(id);
+const canvas=document.getElementById(id)
 
-const ctx=canvas.getContext("2d");
+const ctx=canvas.getContext("2d")
 
-canvas.width=canvas.offsetWidth;
+canvas.width=canvas.offsetWidth
 
-canvas.height=canvas.offsetHeight;
+canvas.height=canvas.offsetHeight
 
-let dibujando=false;
+let dibujando=false
 
-canvas.addEventListener("mousedown",()=>dibujando=true);
+canvas.addEventListener("mousedown",()=>dibujando=true)
 
-canvas.addEventListener("mouseup",()=>dibujando=false);
+canvas.addEventListener("mouseup",()=>dibujando=false)
 
-canvas.addEventListener("mousemove",dibujar);
+canvas.addEventListener("mousemove",dibujar)
 
-canvas.addEventListener("touchstart",()=>dibujando=true);
+canvas.addEventListener("touchstart",()=>dibujando=true)
 
-canvas.addEventListener("touchend",()=>dibujando=false);
+canvas.addEventListener("touchend",()=>dibujando=false)
 
-canvas.addEventListener("touchmove",dibujar);
+canvas.addEventListener("touchmove",dibujar)
 
 function dibujar(e){
 
-if(!dibujando)return;
+if(!dibujando)return
 
-e.preventDefault();
+e.preventDefault()
 
-const rect=canvas.getBoundingClientRect();
+const rect=canvas.getBoundingClientRect()
 
-const x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+const x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left
 
-const y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
+const y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top
 
-ctx.lineWidth=2;
+ctx.lineWidth=2
 
-ctx.lineCap="round";
+ctx.lineCap="round"
 
-ctx.lineTo(x,y);
+ctx.lineTo(x,y)
 
-ctx.stroke();
+ctx.stroke()
 
-ctx.beginPath();
+ctx.beginPath()
 
-ctx.moveTo(x,y);
+ctx.moveTo(x,y)
 
 }
 
@@ -172,171 +187,117 @@ ctx.moveTo(x,y);
 
 function limpiarFirma(id){
 
-const canvas=document.getElementById(id);
+const canvas=document.getElementById(id)
 
-canvas.getContext("2d").clearRect(0,0,canvas.width,canvas.height);
+canvas.getContext("2d").clearRect(0,0,canvas.width,canvas.height)
 
 }
 
-activarFirma("firmaJA");
+activarFirma("firmaJA")
 
-activarFirma("firmaAR");
+activarFirma("firmaAR")
 
 function enviarArbitro(){
 
-const id = Date.now().toString();
+const firmaBase64=firmaJA.toDataURL()
 
-const datos = {
+const url=window.location.href.split("?")[0]+"?"+
 
-competicion: competicion.value,
-fecha: fecha.value,
-prueba: prueba.value,
-dorsal: dorsal.value,
+"competicion="+encodeURIComponent(competicion.value)+
 
-ja_nombre: ja_nombre.value,
-ja_regla: ja_regla.value,
-ja_hora: ja_hora.value,
-ja_incidencia: ja_incidencia.value,
+"&fecha="+encodeURIComponent(fecha.value)+
 
-firmaJA: document.getElementById("firmaJA").toDataURL()
+"&prueba="+encodeURIComponent(prueba.value)+
 
-};
+"&dorsal="+encodeURIComponent(dorsal.value)+
 
-localStorage.setItem("parte_"+id, JSON.stringify(datos));
+"&ja_nombre="+encodeURIComponent(ja_nombre.value)+
 
-const enlace = window.location.origin + window.location.pathname + "?id=" + id;
+"&ja_regla="+encodeURIComponent(ja_regla.value)+
 
-const mensaje = "Completar parte:\n" + enlace;
+"&ja_hora="+encodeURIComponent(ja_hora.value)+
 
-window.location.href = "https://wa.me/?text=" + encodeURIComponent(mensaje);
+"&ja_incidencia="+encodeURIComponent(ja_incidencia.value)+
 
-}
+"&firmaJA="+encodeURIComponent(firmaBase64)
 
-const params=new URLSearchParams(window.location.search);
+const mensaje="Completar parte:\n"+url
 
-const id = params.get("id");
-
-if(id){
-
-const datos = JSON.parse(localStorage.getItem("parte_"+id));
-
-if(datos){
-
-competicion.value = datos.competicion;
-fecha.value = datos.fecha;
-prueba.value = datos.prueba;
-dorsal.value = datos.dorsal;
-
-ja_nombre.value = datos.ja_nombre;
-ja_regla.value = datos.ja_regla;
-ja_hora.value = datos.ja_hora;
-ja_incidencia.value = datos.ja_incidencia;
-
-const img = new Image();
-
-img.onload = function(){
-
-const canvas = document.getElementById("firmaJA");
-const ctx = canvas.getContext("2d");
-
-ctx.drawImage(img,0,0);
-
-};
-
-img.src = datos.firmaJA;
+window.location.href="https://wa.me/?text="+encodeURIComponent(mensaje)
 
 }
-}
 
-const firmaGuardada = params.get("firmaJA");
-
-if (firmaGuardada) {
-
-const img = new Image();
-
-img.onload = function(){
-
-const canvas = document.getElementById("firmaJA");
-const ctx = canvas.getContext("2d");
-
-ctx.drawImage(img,0,0,canvas.width,canvas.height);
-
-};
-
-img.src = firmaGuardada;
-
-}
+const params=new URLSearchParams(window.location.search)
 
 if(params.get("ja_nombre")){
 
-competicion.value=params.get("competicion");
+competicion.value=params.get("competicion")
 
-fecha.value=params.get("fecha");
+fecha.value=params.get("fecha")
 
-prueba.value=params.get("prueba");
+prueba.value=params.get("prueba")
 
-dorsal.value=params.get("dorsal");
+dorsal.value=params.get("dorsal")
 
-ja_nombre.value=params.get("ja_nombre");
+ja_nombre.value=params.get("ja_nombre")
 
-ja_regla.value=params.get("ja_regla");
+ja_regla.value=params.get("ja_regla")
 
-ja_hora.value=params.get("ja_hora");
+ja_hora.value=params.get("ja_hora")
 
-ja_incidencia.value=params.get("ja_incidencia");
+ja_incidencia.value=params.get("ja_incidencia")
+
+const firma=params.get("firmaJA")
+
+if(firma){
+
+const img=new Image()
+
+img.onload=function(){
+
+const canvas=document.getElementById("firmaJA")
+
+const ctx=canvas.getContext("2d")
+
+ctx.drawImage(img,0,0,canvas.width,canvas.height)
+
+}
+
+img.src=firma
+
+}
 
 }
 
 async function generarPDF(){
 
-const {jsPDF}=window.jspdf;
+const {jsPDF}=window.jspdf
 
-const pdf=new jsPDF("p","mm","a4");
+const pdf=new jsPDF()
 
-pdf.setFontSize(12);
+pdf.text("PARTE DE DESCALIFICACIÓN",60,20)
 
-pdf.text("PARTE DE DESCALIFICACIÓN",60,20);
+pdf.text("Competición: "+competicion.value,20,35)
 
-pdf.text("Competición: "+competicion.value,20,35);
-pdf.text("Fecha: "+fecha.value,120,35);
+pdf.text("Prueba: "+prueba.value,20,45)
 
-pdf.text("Prueba: "+prueba.value,20,45);
-pdf.text("Dorsal: "+dorsal.value,120,45);
+pdf.text("Dorsal: "+dorsal.value,120,45)
 
-pdf.text("JUEZ AUXILIAR",20,60);
+pdf.text("Juez Auxiliar: "+ja_nombre.value,20,65)
 
-pdf.text("Nombre: "+ja_nombre.value,20,70);
-pdf.text("Regla: "+ja_regla.value,20,80);
-pdf.text("Hora: "+ja_hora.value,120,80);
+pdf.text("Regla: "+ja_regla.value,20,75)
 
-pdf.text("Incidencia:",20,90);
-pdf.text(ja_incidencia.value,20,100);
+pdf.addImage(firmaJA.toDataURL(),"PNG",20,85,60,30)
 
-const firma1=firmaJA.toDataURL("image/png");
+pdf.addPage()
 
-pdf.addImage(firma1,"PNG",20,120,60,25);
+pdf.text("Juez Árbitro: "+ar_nombre.value,20,20)
 
-pdf.text("JUEZ ÁRBITRO",20,160);
+pdf.text("Descalificado: "+ar_descalificado.value,20,30)
 
-pdf.text("Nombre: "+ar_nombre.value,20,170);
+pdf.addImage(firmaAR.toDataURL(),"PNG",20,40,60,30)
 
-pdf.text("Descalificado: "+ar_descalificado.value,20,180);
-
-pdf.text("Regla: "+ar_regla.value,20,190);
-
-pdf.text("Fecha: "+ar_fecha.value,120,190);
-
-pdf.text("Hora: "+ar_hora.value,160,190);
-
-pdf.text("Observaciones:",20,205);
-
-pdf.text(ar_obs.value,20,215);
-
-const firma2=firmaAR.toDataURL("image/png");
-
-pdf.addImage(firma2,"PNG",20,235,60,25);
-
-pdf.save("parte_descalificacion.pdf");
+pdf.save("parte_descalificacion.pdf")
 
 }
 
