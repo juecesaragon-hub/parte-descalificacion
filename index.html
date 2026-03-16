@@ -280,8 +280,6 @@ canvas.style.pointerEvents = "none";
 
 function enviarArbitro(){
 
-ja_hora.value = horaActual();   // ← AÑADIR ESTA LÍNEA
-
 const firmaJA = document.getElementById("firmaJA");
 
 if(firmaJA.toDataURL().length < 2000){
@@ -289,21 +287,29 @@ alert("Debe firmar el juez auxiliar");
 return;
 }
 
-bloquearAuxiliar();
+ja_hora.value = horaActual();
 
-const firmaBase64 = firmaJA.toDataURL();
+const id = Date.now();
 
-const url = window.location.href.split("?")[0] + "?" +
+const datos = {
 
-"competicion=" + encodeURIComponent(competicion.value) +
-"&fecha=" + encodeURIComponent(fecha.value) +
-"&prueba=" + encodeURIComponent(prueba.value) +
-"&dorsal=" + encodeURIComponent(dorsal.value) +
-"&ja_nombre=" + encodeURIComponent(ja_nombre.value) +
-"&ja_regla=" + encodeURIComponent(ja_regla.value) +
-"&ja_hora=" + encodeURIComponent(ja_hora.value) +
-"&ja_incidencia=" + encodeURIComponent(ja_incidencia.value) +
-"&firmaJA=" + encodeURIComponent(firmaBase64);
+competicion:competicion.value,
+fecha:fecha.value,
+prueba:prueba.value,
+dorsal:dorsal.value,
+
+ja_nombre:ja_nombre.value,
+ja_regla:ja_regla.value,
+ja_hora:ja_hora.value,
+ja_incidencia:ja_incidencia.value,
+
+firmaJA:firmaJA.toDataURL()
+
+};
+
+localStorage.setItem("parte_"+id, JSON.stringify(datos));
+
+const url = window.location.href.split("?")[0] + "?id=" + id;
 
 const mensaje = "Completar parte:\n" + url;
 
@@ -317,56 +323,41 @@ const params=new URLSearchParams(window.location.search)
 const firmaJA = document.getElementById("firmaJA");
 const firmaAR = document.getElementById("firmaAR");
 
-if(params.get("ja_nombre")){
+const id = params.get("id");
 
-competicion.value=params.get("competicion")
+if(id){
 
-fecha.value=params.get("fecha")
+const datos = JSON.parse(localStorage.getItem("parte_"+id));
 
-prueba.value=params.get("prueba")
+if(datos){
 
-dorsal.value=params.get("dorsal")
+competicion.value = datos.competicion;
+fecha.value = datos.fecha;
+prueba.value = datos.prueba;
+dorsal.value = datos.dorsal;
 
-ja_nombre.value=params.get("ja_nombre")
-
-ja_regla.value=params.get("ja_regla")
-
-ja_hora.value=params.get("ja_hora")
-
-ja_incidencia.value=params.get("ja_incidencia")
-
-const firma=params.get("firmaJA")
-
-if(firma){
-
-const canvas = document.getElementById("firmaJA");
-const ctx = canvas.getContext("2d");
+ja_nombre.value = datos.ja_nombre;
+ja_regla.value = datos.ja_regla;
+ja_hora.value = datos.ja_hora;
+ja_incidencia.value = datos.ja_incidencia;
 
 const img = new Image();
 
 img.onload = function(){
 
-ctx.clearRect(0,0,canvas.width,canvas.height);
+const canvas = document.getElementById("firmaJA");
+const ctx = canvas.getContext("2d");
 
-const ratio = Math.min(
-canvas.width / img.width,
-canvas.height / img.height
-);
-
-const w = img.width * ratio;
-const h = img.height * ratio;
-
-const x = (canvas.width - w) / 2;
-const y = (canvas.height - h) / 2;
-
-ctx.drawImage(img,x,y,w,h);
+ctx.drawImage(img,0,0,canvas.width,canvas.height);
 
 };
 
-img.src = firma;
+img.src = datos.firmaJA;
+
+bloquearFormularioAuxiliar();
 
 }
-bloquearFormularioAuxiliar();
+
 }
 
 async function generarPDF(){
