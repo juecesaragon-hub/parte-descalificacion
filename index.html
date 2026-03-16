@@ -221,44 +221,43 @@ document.querySelectorAll("#ja_nombre,#ja_regla,#ja_hora,#ja_incidencia")
 .forEach(campo => campo.disabled=true)
 
 }
-if(firmaJA.toDataURL().length<2000){
+
+function enviarArbitro(){
+
+const firmaJA = document.getElementById("firmaJA");
+
+if(firmaJA.toDataURL().length < 2000){
 alert("Debe firmar el juez auxiliar");
 return;
 }
 
 bloquearAuxiliar();
 
-function enviarArbitro(){
+const firmaBase64 = firmaJA.toDataURL();
 
-const firmaBase64=firmaJA.toDataURL()
+const url = window.location.href.split("?")[0] + "?" +
 
-const url=window.location.href.split("?")[0]+"?"+
+"competicion=" + encodeURIComponent(competicion.value) +
+"&fecha=" + encodeURIComponent(fecha.value) +
+"&prueba=" + encodeURIComponent(prueba.value) +
+"&dorsal=" + encodeURIComponent(dorsal.value) +
+"&ja_nombre=" + encodeURIComponent(ja_nombre.value) +
+"&ja_regla=" + encodeURIComponent(ja_regla.value) +
+"&ja_hora=" + encodeURIComponent(ja_hora.value) +
+"&ja_incidencia=" + encodeURIComponent(ja_incidencia.value) +
+"&firmaJA=" + encodeURIComponent(firmaBase64);
 
-"competicion="+encodeURIComponent(competicion.value)+
+const mensaje = "Completar parte:\n" + url;
 
-"&fecha="+encodeURIComponent(fecha.value)+
-
-"&prueba="+encodeURIComponent(prueba.value)+
-
-"&dorsal="+encodeURIComponent(dorsal.value)+
-
-"&ja_nombre="+encodeURIComponent(ja_nombre.value)+
-
-"&ja_regla="+encodeURIComponent(ja_regla.value)+
-
-"&ja_hora="+encodeURIComponent(ja_hora.value)+
-
-"&ja_incidencia="+encodeURIComponent(ja_incidencia.value)+
-
-"&firmaJA="+encodeURIComponent(firmaBase64)
-
-const mensaje="Completar parte:\n"+url
-
-window.location.href="https://wa.me/?text="+encodeURIComponent(mensaje)
+window.location.href =
+"https://wa.me/?text=" + encodeURIComponent(mensaje);
 
 }
 
 const params=new URLSearchParams(window.location.search)
+
+const firmaJA = document.getElementById("firmaJA");
+const firmaAR = document.getElementById("firmaAR");
 
 if(params.get("ja_nombre")){
 
@@ -301,6 +300,9 @@ img.src=firma
 }
 
 async function generarPDF(){
+
+const firmaJA = document.getElementById("firmaJA");
+const firmaAR = document.getElementById("firmaAR");
 
 const {jsPDF}=window.jspdf;
 
