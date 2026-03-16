@@ -280,6 +280,8 @@ canvas.style.pointerEvents = "none";
 
 function enviarArbitro(){
 
+ja_hora.value = horaActual();   // ← AÑADIR ESTA LÍNEA
+
 const firmaJA = document.getElementById("firmaJA");
 
 if(firmaJA.toDataURL().length < 2000){
