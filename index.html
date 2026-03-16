@@ -179,13 +179,19 @@ canvas.height=canvas.offsetHeight
 
 let dibujando=false
 
-canvas.addEventListener("mousedown",()=>dibujando=true)
+canvas.addEventListener("mousedown",()=>{
+dibujando=true
+guardarHoraFirma(id)
+})
 
 canvas.addEventListener("mouseup",()=>dibujando=false)
 
 canvas.addEventListener("mousemove",dibujar)
 
-canvas.addEventListener("touchstart",()=>dibujando=true)
+canvas.addEventListener("touchstart",()=>{
+dibujando=true
+guardarHoraFirma(id)
+})
 
 canvas.addEventListener("touchend",()=>dibujando=false)
 
@@ -228,6 +234,20 @@ ahora.getMinutes().toString().padStart(2,"0");
 
 }
 
+function guardarHoraFirma(id){
+
+const hora = horaActual()
+
+if(id==="firmaJA"){
+document.getElementById("ja_hora").value = hora
+}
+
+if(id==="firmaAR"){
+document.getElementById("ar_hora").value = hora
+}
+
+}
+
 function limpiarFirma(id){
 
 const canvas=document.getElementById(id)
@@ -247,9 +267,18 @@ document.querySelectorAll("#ja_nombre,#ja_regla,#ja_hora,#ja_incidencia")
 
 }
 
-function enviarArbitro(){
+function bloquearFormularioAuxiliar(){
 
-ja_hora.value = horaActual();
+document.querySelectorAll(
+"#competicion,#fecha,#prueba,#dorsal,#ja_nombre,#ja_regla,#ja_hora,#ja_incidencia"
+).forEach(campo => campo.disabled = true);
+
+const canvas = document.getElementById("firmaJA");
+canvas.style.pointerEvents = "none";
+
+}
+
+function enviarArbitro(){
 
 const firmaJA = document.getElementById("firmaJA");
 
@@ -335,12 +364,10 @@ ctx.drawImage(img,x,y,w,h);
 img.src = firma;
 
 }
-
+bloquearFormularioAuxiliar();
 }
 
 async function generarPDF(){
-
-ar_hora.value = horaActual();
 
 const firmaJA = document.getElementById("firmaJA");
 const firmaAR = document.getElementById("firmaAR");
