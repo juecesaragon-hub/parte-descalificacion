@@ -280,36 +280,36 @@ canvas.style.pointerEvents = "none";
 
 function enviarArbitro(){
 
-const firmaJA = document.getElementById("firmaJA");
+const canvas = document.getElementById("firmaJA");
 
-if(firmaJA.toDataURL().length < 2000){
+if(canvas.toDataURL().length < 2000){
 alert("Debe firmar el juez auxiliar");
 return;
 }
 
 ja_hora.value = horaActual();
 
-const id = Date.now();
-
 const datos = {
 
-competicion:competicion.value,
-fecha:fecha.value,
-prueba:prueba.value,
-dorsal:dorsal.value,
+c:competicion.value,
+f:fecha.value,
+p:prueba.value,
+d:dorsal.value,
 
-ja_nombre:ja_nombre.value,
-ja_regla:ja_regla.value,
-ja_hora:ja_hora.value,
-ja_incidencia:ja_incidencia.value,
+jn:ja_nombre.value,
+jr:ja_regla.value,
+jh:ja_hora.value,
+ji:ja_incidencia.value,
 
-firmaJA:firmaJA.toDataURL()
+fs:canvas.toDataURL()
 
 };
 
-localStorage.setItem("parte_"+id, JSON.stringify(datos));
+const datosJSON = JSON.stringify(datos);
 
-const url = window.location.href.split("?")[0] + "?id=" + id;
+const datosCodificados = btoa(unescape(encodeURIComponent(datosJSON)));
+
+const url = window.location.href.split("?")[0] + "?data=" + datosCodificados;
 
 const mensaje = "Completar parte:\n" + url;
 
@@ -323,23 +323,21 @@ const params=new URLSearchParams(window.location.search)
 const firmaJA = document.getElementById("firmaJA");
 const firmaAR = document.getElementById("firmaAR");
 
-const id = params.get("id");
+const data = params.get("data");
 
-if(id){
+if(data){
 
-const datos = JSON.parse(localStorage.getItem("parte_"+id));
+const datos = JSON.parse(decodeURIComponent(escape(atob(data))));
 
-if(datos){
+competicion.value = datos.c;
+fecha.value = datos.f;
+prueba.value = datos.p;
+dorsal.value = datos.d;
 
-competicion.value = datos.competicion;
-fecha.value = datos.fecha;
-prueba.value = datos.prueba;
-dorsal.value = datos.dorsal;
-
-ja_nombre.value = datos.ja_nombre;
-ja_regla.value = datos.ja_regla;
-ja_hora.value = datos.ja_hora;
-ja_incidencia.value = datos.ja_incidencia;
+ja_nombre.value = datos.jn;
+ja_regla.value = datos.jr;
+ja_hora.value = datos.jh;
+ja_incidencia.value = datos.ji;
 
 const img = new Image();
 
@@ -352,7 +350,7 @@ ctx.drawImage(img,0,0,canvas.width,canvas.height);
 
 };
 
-img.src = datos.firmaJA;
+img.src = datos.fs;
 
 bloquearFormularioAuxiliar();
 
