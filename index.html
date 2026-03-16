@@ -121,7 +121,23 @@ hr{margin:25px 0}
 
 </select>
 
-<input id="ar_regla" placeholder="Regla">
+<select id="ar_regla">
+
+<option value="">Seleccionar regla WA</option>
+
+<option>TR16.5 Salida falsa</option>
+<option>TR17.2 Obstrucción</option>
+<option>TR17.3 Empujar o bloquear</option>
+<option>TR17.4 Abandono de calle</option>
+<option>TR17.5 Recorte de distancia</option>
+<option>TR18.5 Ayuda externa</option>
+<option>TR24.7 Error en relevos</option>
+<option>TR24.8 Zona de cambio incorrecta</option>
+<option>TR25.19 Intento nulo salto</option>
+<option>TR26.7 Intento nulo altura</option>
+<option>TR28.12 Intento nulo lanzamiento</option>
+
+</select>
 
 <input id="ar_fecha" type="date">
 
@@ -141,13 +157,13 @@ hr{margin:25px 0}
 
 window.onload = function(){
 
-const hoy = new Date();
+const hoy = new Date().toISOString().split("T")[0];
 
-document.getElementById("fecha").value = hoy.toISOString().split("T")[0];
+document.getElementById("fecha").value = hoy;
+document.getElementById("ar_fecha").value = hoy;
 
-document.getElementById("ja_hora").value =
-hoy.getHours().toString().padStart(2,"0")+":"+
-hoy.getMinutes().toString().padStart(2,"0");
+activarFirma("firmaJA");
+activarFirma("firmaAR");
 
 }
 
@@ -203,6 +219,15 @@ ctx.moveTo(x,y)
 
 }
 
+function horaActual(){
+
+const ahora = new Date();
+
+return ahora.getHours().toString().padStart(2,"0")+":"+
+ahora.getMinutes().toString().padStart(2,"0");
+
+}
+
 function limpiarFirma(id){
 
 const canvas=document.getElementById(id)
@@ -223,6 +248,8 @@ document.querySelectorAll("#ja_nombre,#ja_regla,#ja_hora,#ja_incidencia")
 }
 
 function enviarArbitro(){
+
+ja_hora.value = horaActual();
 
 const firmaJA = document.getElementById("firmaJA");
 
@@ -281,25 +308,39 @@ const firma=params.get("firmaJA")
 
 if(firma){
 
-const img=new Image()
+const canvas = document.getElementById("firmaJA");
+const ctx = canvas.getContext("2d");
 
-img.onload=function(){
+const img = new Image();
 
-const canvas=document.getElementById("firmaJA")
+img.onload = function(){
 
-const ctx=canvas.getContext("2d")
+ctx.clearRect(0,0,canvas.width,canvas.height);
 
-ctx.drawImage(img,0,0,canvas.width,canvas.height)
+const ratio = Math.min(
+canvas.width / img.width,
+canvas.height / img.height
+);
 
-}
+const w = img.width * ratio;
+const h = img.height * ratio;
 
-img.src=firma
+const x = (canvas.width - w) / 2;
+const y = (canvas.height - h) / 2;
+
+ctx.drawImage(img,x,y,w,h);
+
+};
+
+img.src = firma;
 
 }
 
 }
 
 async function generarPDF(){
+
+ar_hora.value = horaActual();
 
 const firmaJA = document.getElementById("firmaJA");
 const firmaAR = document.getElementById("firmaAR");
