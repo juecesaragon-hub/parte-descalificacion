@@ -155,7 +155,7 @@ hr{margin:25px 0}
 
 <script>
 
-window.onload = function(){
+document.addEventListener("DOMContentLoaded", function(){
 
 const hoy = new Date().toISOString().split("T")[0];
 
@@ -165,7 +165,7 @@ document.getElementById("ar_fecha").value = hoy;
 activarFirma("firmaJA");
 activarFirma("firmaAR");
 
-}
+});
 
 function activarFirma(id){
 
@@ -179,8 +179,9 @@ canvas.height=canvas.offsetHeight
 
 let dibujando=false
 
-canvas.addEventListener("mousedown",()=>{
+canvas.addEventListener("mousedown",(e)=>{
 dibujando=true
+ctx.beginPath()
 guardarHoraFirma(id)
 })
 
@@ -188,8 +189,9 @@ canvas.addEventListener("mouseup",()=>dibujando=false)
 
 canvas.addEventListener("mousemove",dibujar)
 
-canvas.addEventListener("touchstart",()=>{
+canvas.addEventListener("touchstart",(e)=>{
 dibujando=true
+ctx.beginPath()
 guardarHoraFirma(id)
 })
 
@@ -255,10 +257,6 @@ const canvas=document.getElementById(id)
 canvas.getContext("2d").clearRect(0,0,canvas.width,canvas.height)
 
 }
-
-activarFirma("firmaJA")
-
-activarFirma("firmaAR")
 
 function bloquearAuxiliar(){
 
