@@ -1,221 +1,112 @@
 <script>
 
-window.onload = iniciarApp;
+window.addEventListener("load", function(){
 
-function iniciarApp(){
+ponerFechaActual();
+activarFirma("firmaJA");
+activarFirma("firmaAR");
 
-// FECHA ACTUAL
+});
+
+function ponerFechaActual(){
+
 const hoy = new Date();
-const fechaHoy =
-hoy.getFullYear() + "-" +
-String(hoy.getMonth()+1).padStart(2,"0") + "-" +
+const fecha =
+hoy.getFullYear()+"-"+
+String(hoy.getMonth()+1).padStart(2,"0")+"-"+
 String(hoy.getDate()).padStart(2,"0");
 
-document.getElementById("fecha").value = fechaHoy;
-document.getElementById("ar_fecha").value = fechaHoy;
+const f1 = document.getElementById("fecha");
+const f2 = document.getElementById("ar_fecha");
 
-// INICIAR FIRMAS
-configurarCanvas("firmaJA");
-configurarCanvas("firmaAR");
-
-// CARGAR DATOS SI VIENEN EN URL
-cargarDatosURL();
+if(f1) f1.value = fecha;
+if(f2) f2.value = fecha;
 
 }
 
-function configurarCanvas(id){
+function activarFirma(id){
 
 const canvas = document.getElementById(id);
+if(!canvas) return;
+
 const ctx = canvas.getContext("2d");
 
-// AJUSTAR TAMAÑO REAL
 canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
 
-ctx.lineWidth = 2;
-ctx.lineCap = "round";
-
 let dibujando = false;
 
-function posicion(e){
+function pos(e){
 
 const rect = canvas.getBoundingClientRect();
 
 if(e.touches){
-
 return {
-x:e.touches[0].clientX - rect.left,
-y:e.touches[0].clientY - rect.top
+x:e.touches[0].clientX-rect.left,
+y:e.touches[0].clientY-rect.top
 };
-
 }else{
-
 return {
-x:e.clientX - rect.left,
-y:e.clientY - rect.top
+x:e.clientX-rect.left,
+y:e.clientY-rect.top
 };
-
 }
 
 }
 
-function empezar(e){
+function start(e){
 
 e.preventDefault();
 
 dibujando = true;
 
-const pos = posicion(e);
+const p = pos(e);
 
 ctx.beginPath();
-ctx.moveTo(pos.x,pos.y);
-
-guardarHoraFirma(id);
+ctx.moveTo(p.x,p.y);
 
 }
 
-function dibujar(e){
+function move(e){
 
 if(!dibujando) return;
 
 e.preventDefault();
 
-const pos = posicion(e);
+const p = pos(e);
 
-ctx.lineTo(pos.x,pos.y);
+ctx.lineWidth = 2;
+ctx.lineCap = "round";
+
+ctx.lineTo(p.x,p.y);
 ctx.stroke();
 
 }
 
-function terminar(){
+function end(){
 
 dibujando = false;
 
 }
 
-canvas.addEventListener("mousedown", empezar);
-canvas.addEventListener("mousemove", dibujar);
-canvas.addEventListener("mouseup", terminar);
-canvas.addEventListener("mouseleave", terminar);
+canvas.addEventListener("mousedown",start);
+canvas.addEventListener("mousemove",move);
+canvas.addEventListener("mouseup",end);
+canvas.addEventListener("mouseleave",end);
 
-canvas.addEventListener("touchstart", empezar, {passive:false});
-canvas.addEventListener("touchmove", dibujar, {passive:false});
-canvas.addEventListener("touchend", terminar);
-
-}
-
-function horaActual(){
-
-const ahora = new Date();
-
-return String(ahora.getHours()).padStart(2,"0")+":"+
-String(ahora.getMinutes()).padStart(2,"0");
-
-}
-
-function guardarHoraFirma(id){
-
-if(id==="firmaJA"){
-document.getElementById("ja_hora").value = horaActual();
-}
-
-if(id==="firmaAR"){
-document.getElementById("ar_hora").value = horaActual();
-}
+canvas.addEventListener("touchstart",start,{passive:false});
+canvas.addEventListener("touchmove",move,{passive:false});
+canvas.addEventListener("touchend",end);
 
 }
 
 function limpiarFirma(id){
 
 const canvas = document.getElementById(id);
-const ctx = canvas.getContext("2d");
+if(!canvas) return;
 
+const ctx = canvas.getContext("2d");
 ctx.clearRect(0,0,canvas.width,canvas.height);
-
-}
-
-function cargarDatosURL(){
-
-const params = new URLSearchParams(window.location.search);
-const data = params.get("data");
-
-if(!data) return;
-
-const datos = JSON.parse(decodeURIComponent(escape(atob(data))));
-
-document.getElementById("competicion").value = datos.c;
-document.getElementById("fecha").value = datos.f;
-document.getElementById("prueba").value = datos.p;
-document.getElementById("dorsal").value = datos.d;
-
-document.getElementById("ja_nombre").value = datos.jn;
-document.getElementById("ja_regla").value = datos.jr;
-document.getElementById("ja_hora").value = datos.jh;
-document.getElementById("ja_incidencia").value = datos.ji;
-
-const canvas = document.getElementById("firmaJA");
-const ctx = canvas.getContext("2d");
-
-const img = new Image();
-
-img.onload = function(){
-ctx.drawImage(img,0,0,canvas.width,canvas.height);
-};
-
-img.src = datos.fs;
-
-bloquearFormularioAuxiliar();
-
-}
-
-function bloquearFormularioAuxiliar(){
-
-document.querySelectorAll(
-"#competicion,#fecha,#prueba,#dorsal,#ja_nombre,#ja_regla,#ja_hora,#ja_incidencia"
-).forEach(campo => campo.disabled = true);
-
-document.getElementById("firmaJA").style.pointerEvents = "none";
-
-}
-
-function enviarArbitro(){
-
-const canvas = document.getElementById("firmaJA");
-
-if(canvas.toDataURL().length < 2000){
-
-alert("Debe firmar el juez auxiliar");
-return;
-
-}
-
-document.getElementById("ja_hora").value = horaActual();
-
-const datos = {
-
-c:competicion.value,
-f:fecha.value,
-p:prueba.value,
-d:dorsal.value,
-
-jn:ja_nombre.value,
-jr:ja_regla.value,
-jh:ja_hora.value,
-ji:ja_incidencia.value,
-
-fs:canvas.toDataURL()
-
-};
-
-const datosJSON = JSON.stringify(datos);
-const datosCodificados = btoa(unescape(encodeURIComponent(datosJSON)));
-
-const url = window.location.href.split("?")[0] + "?data=" + datosCodificados;
-
-const mensaje = "Completar parte:\n" + url;
-
-window.location.href =
-"https://wa.me/?text=" + encodeURIComponent(mensaje);
 
 }
 
