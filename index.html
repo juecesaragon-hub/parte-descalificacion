@@ -1,45 +1,60 @@
 <script>
 
-document.addEventListener("DOMContentLoaded", iniciarApp);
+window.onload = iniciarApp;
 
 function iniciarApp(){
 
-const hoy = new Date().toISOString().split("T")[0];
+// FECHA ACTUAL
+const hoy = new Date();
+const fechaHoy =
+hoy.getFullYear() + "-" +
+String(hoy.getMonth()+1).padStart(2,"0") + "-" +
+String(hoy.getDate()).padStart(2,"0");
 
-document.getElementById("fecha").value = hoy;
-document.getElementById("ar_fecha").value = hoy;
+document.getElementById("fecha").value = fechaHoy;
+document.getElementById("ar_fecha").value = fechaHoy;
 
-iniciarFirma("firmaJA");
-iniciarFirma("firmaAR");
+// INICIAR FIRMAS
+configurarCanvas("firmaJA");
+configurarCanvas("firmaAR");
 
+// CARGAR DATOS SI VIENEN EN URL
 cargarDatosURL();
 
 }
 
-function iniciarFirma(id){
+function configurarCanvas(id){
 
 const canvas = document.getElementById(id);
 const ctx = canvas.getContext("2d");
 
+// AJUSTAR TAMAÑO REAL
 canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
 
+ctx.lineWidth = 2;
+ctx.lineCap = "round";
+
 let dibujando = false;
 
-function obtenerPos(e){
+function posicion(e){
 
 const rect = canvas.getBoundingClientRect();
 
 if(e.touches){
+
 return {
 x:e.touches[0].clientX - rect.left,
 y:e.touches[0].clientY - rect.top
 };
+
 }else{
+
 return {
 x:e.clientX - rect.left,
 y:e.clientY - rect.top
 };
+
 }
 
 }
@@ -50,7 +65,7 @@ e.preventDefault();
 
 dibujando = true;
 
-const pos = obtenerPos(e);
+const pos = posicion(e);
 
 ctx.beginPath();
 ctx.moveTo(pos.x,pos.y);
@@ -65,10 +80,7 @@ if(!dibujando) return;
 
 e.preventDefault();
 
-const pos = obtenerPos(e);
-
-ctx.lineWidth = 2;
-ctx.lineCap = "round";
+const pos = posicion(e);
 
 ctx.lineTo(pos.x,pos.y);
 ctx.stroke();
@@ -81,14 +93,14 @@ dibujando = false;
 
 }
 
-canvas.addEventListener("mousedown",empezar);
-canvas.addEventListener("mousemove",dibujar);
-canvas.addEventListener("mouseup",terminar);
-canvas.addEventListener("mouseleave",terminar);
+canvas.addEventListener("mousedown", empezar);
+canvas.addEventListener("mousemove", dibujar);
+canvas.addEventListener("mouseup", terminar);
+canvas.addEventListener("mouseleave", terminar);
 
-canvas.addEventListener("touchstart",empezar,{passive:false});
-canvas.addEventListener("touchmove",dibujar,{passive:false});
-canvas.addEventListener("touchend",terminar);
+canvas.addEventListener("touchstart", empezar, {passive:false});
+canvas.addEventListener("touchmove", dibujar, {passive:false});
+canvas.addEventListener("touchend", terminar);
 
 }
 
@@ -96,21 +108,19 @@ function horaActual(){
 
 const ahora = new Date();
 
-return ahora.getHours().toString().padStart(2,"0")+":"+
-ahora.getMinutes().toString().padStart(2,"0");
+return String(ahora.getHours()).padStart(2,"0")+":"+
+String(ahora.getMinutes()).padStart(2,"0");
 
 }
 
 function guardarHoraFirma(id){
 
-const hora = horaActual();
-
 if(id==="firmaJA"){
-document.getElementById("ja_hora").value = hora;
+document.getElementById("ja_hora").value = horaActual();
 }
 
 if(id==="firmaAR"){
-document.getElementById("ar_hora").value = hora;
+document.getElementById("ar_hora").value = horaActual();
 }
 
 }
@@ -133,25 +143,23 @@ if(!data) return;
 
 const datos = JSON.parse(decodeURIComponent(escape(atob(data))));
 
-competicion.value = datos.c;
-fecha.value = datos.f;
-prueba.value = datos.p;
-dorsal.value = datos.d;
+document.getElementById("competicion").value = datos.c;
+document.getElementById("fecha").value = datos.f;
+document.getElementById("prueba").value = datos.p;
+document.getElementById("dorsal").value = datos.d;
 
-ja_nombre.value = datos.jn;
-ja_regla.value = datos.jr;
-ja_hora.value = datos.jh;
-ja_incidencia.value = datos.ji;
-
-const img = new Image();
-
-img.onload = function(){
+document.getElementById("ja_nombre").value = datos.jn;
+document.getElementById("ja_regla").value = datos.jr;
+document.getElementById("ja_hora").value = datos.jh;
+document.getElementById("ja_incidencia").value = datos.ji;
 
 const canvas = document.getElementById("firmaJA");
 const ctx = canvas.getContext("2d");
 
-ctx.drawImage(img,0,0,canvas.width,canvas.height);
+const img = new Image();
 
+img.onload = function(){
+ctx.drawImage(img,0,0,canvas.width,canvas.height);
 };
 
 img.src = datos.fs;
@@ -166,8 +174,7 @@ document.querySelectorAll(
 "#competicion,#fecha,#prueba,#dorsal,#ja_nombre,#ja_regla,#ja_hora,#ja_incidencia"
 ).forEach(campo => campo.disabled = true);
 
-const canvas = document.getElementById("firmaJA");
-canvas.style.pointerEvents = "none";
+document.getElementById("firmaJA").style.pointerEvents = "none";
 
 }
 
@@ -176,11 +183,13 @@ function enviarArbitro(){
 const canvas = document.getElementById("firmaJA");
 
 if(canvas.toDataURL().length < 2000){
+
 alert("Debe firmar el juez auxiliar");
 return;
+
 }
 
-ja_hora.value = horaActual();
+document.getElementById("ja_hora").value = horaActual();
 
 const datos = {
 
@@ -199,7 +208,6 @@ fs:canvas.toDataURL()
 };
 
 const datosJSON = JSON.stringify(datos);
-
 const datosCodificados = btoa(unescape(encodeURIComponent(datosJSON)));
 
 const url = window.location.href.split("?")[0] + "?data=" + datosCodificados;
