@@ -1,19 +1,53 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Parte descalificación</title>
+<title>Test</title>
 </head>
 
 <body>
 
-<!-- TODO EL FORMULARIO AQUÍ -->
+<h2>Test firma</h2>
 
-<canvas id="firmaJA"></canvas>
-<canvas id="firmaAR"></canvas>
+<input id="fecha" type="date">
+
+<br><br>
+
+<canvas id="firmaJA" style="border:1px solid black;width:300px;height:150px;"></canvas>
 
 <script>
-/* TU SCRIPT */
+
+const hoy = new Date();
+
+const fecha =
+hoy.getFullYear()+"-"+
+String(hoy.getMonth()+1).padStart(2,"0")+"-"+
+String(hoy.getDate()).padStart(2,"0");
+
+document.getElementById("fecha").value = fecha;
+
+const canvas = document.getElementById("firmaJA");
+const ctx = canvas.getContext("2d");
+
+canvas.width = 300;
+canvas.height = 150;
+
+let dibujando = false;
+
+canvas.addEventListener("mousedown",e=>{
+dibujando=true;
+ctx.beginPath();
+ctx.moveTo(e.offsetX,e.offsetY);
+});
+
+canvas.addEventListener("mousemove",e=>{
+if(!dibujando) return;
+ctx.lineTo(e.offsetX,e.offsetY);
+ctx.stroke();
+});
+
+canvas.addEventListener("mouseup",()=>dibujando=false);
+
 </script>
 
 </body>
